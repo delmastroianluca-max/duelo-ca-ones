@@ -46,7 +46,6 @@ const ANGLE_MAX_P1 = -10;
 const ANGLE_MIN_P2 = -170;
 const ANGLE_MAX_P2 = -95;
 
-// Detectar dispositivo táctil
 const ES_TACTIL = (
   'ontouchstart' in window ||
   navigator.maxTouchPoints > 0 ||
@@ -56,11 +55,9 @@ const ES_TACTIL = (
   /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 );
 
-// ---------- CANVAS ----------
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 
-// ---------- SKINS ----------
 const SKINS = {
   canon:  { emoji: '🎯', name: 'Cañón' },
   robot:  { emoji: '🤖', name: 'Robot' },
@@ -105,9 +102,6 @@ const BUFFS_POR_RAREZA = {
   legendaria: ['inmunidad']
 };
 
-// Posiciones por defecto de los botones táctiles
-// - Fila superior: SALTAR + APUNTAR ARRIBA
-// - Fila inferior: MOVER IZQ + APUNTAR ABAJO + MOVER DER + DISPARAR
 const TOUCH_DEFAULT = {
   jump:       { fromLeft: 20,  fromTop: 20,     icono: '⤒', label: 'SALTAR',  cls: 'jump-btn' },
   aimUp:      { fromLeft: 110, fromTop: 20,     icono: '▲', label: 'ARRIBA',  cls: 'aim-btn' },
@@ -117,7 +111,6 @@ const TOUCH_DEFAULT = {
   shoot:      { fromRight: 20, fromBottom: 30,  icono: '🔥', label: 'DISPARAR', cls: 'shoot-btn' }
 };
 
-// ---------- PREFERENCIAS ----------
 const DEFAULT_PREFS = {
   keys: {
     p1: { left: 'a', right: 'd', aimUp: 'w', aimDown: 's', jump: 'q', shoot: ' ' },
@@ -158,13 +151,11 @@ function loadPrefs() {
     if (p.fondo) merged.fondo = p.fondo;
     if (p.duracion) merged.duracion = p.duracion;
     if (p.botlevel) merged.botlevel = p.botlevel;
-
     if (p.touch) {
       for (const key of Object.keys(TOUCH_DEFAULT)) {
         if (p.touch[key]) merged.touch[key] = p.touch[key];
       }
     }
-
     return merged;
   } catch (e) {
     return JSON.parse(JSON.stringify(DEFAULT_PREFS));
@@ -172,7 +163,6 @@ function loadPrefs() {
 }
 function savePrefs() { localStorage.setItem('duelo-prefs', JSON.stringify(prefs)); }
 
-// ---------- JUGADORES ----------
 function makePlayer(id, x, angle) {
   return {
     id, x, y: GROUND_Y, angle,
@@ -216,14 +206,9 @@ let modoActual = 'local';
 let faseActual = 'normal';
 let tiempoRestante = 360;
 let suddenStartTime = 0;
-
-// Semiturnos
 let turnoActual = 1;
 let tiempoTurno = TURNO_TIME;
 
-// ============================================================
-//   AMBIENTE
-// ============================================================
 const AMBIENTE = { particulas: [], fondoActual: null };
 
 function initAmbiente(nombreFondo, cantidadMax, w, h) {
@@ -289,9 +274,6 @@ function drawAmbiente(c, w, h) {
   c.globalAlpha = 1;
 }
 
-// ============================================================
-//   FONDOS
-// ============================================================
 function drawCielo(c, w, h, nombre) {
   const f = FONDOS[nombre];
   const grad = c.createLinearGradient(0, 0, 0, h);
@@ -320,21 +302,7 @@ function drawFondo(c, w, h, nombre, tiempo, esJuego) {
     c.fillStyle = '#eef6ff';
     c.beginPath(); c.arc(w - 120, 80, 26, 0, Math.PI * 2); c.fill();
     c.shadowBlur = 0;
-    c.fillStyle = '#c8d8e8';
-    c.beginPath(); c.arc(w - 128, 74, 4, 0, Math.PI * 2); c.fill();
-    c.beginPath(); c.arc(w - 112, 88, 5, 0, Math.PI * 2); c.fill();
   } else if (nombre === 'claro') {
-    c.save(); c.translate(w - 110, 90); c.rotate(tiempo * 0.3);
-    c.strokeStyle = '#ffdd66'; c.lineWidth = 3;
-    for (let i = 0; i < 12; i++) {
-      const a = (i / 12) * Math.PI * 2;
-      c.beginPath(); c.moveTo(Math.cos(a) * 36, Math.sin(a) * 36); c.lineTo(Math.cos(a) * 50, Math.sin(a) * 50); c.stroke();
-    }
-    c.restore();
-    c.shadowColor = '#ffee88'; c.shadowBlur = 40;
-    c.fillStyle = '#ffee88';
-    c.beginPath(); c.arc(w - 110, 90, 32, 0, Math.PI * 2); c.fill();
-    c.shadowBlur = 0;
     c.fillStyle = '#7aa86a';
     c.beginPath();
     c.moveTo(0, groundY);
@@ -342,15 +310,6 @@ function drawFondo(c, w, h, nombre, tiempo, esJuego) {
     c.quadraticCurveTo(w * 0.6, groundY - 140, w * 0.8, groundY - 50);
     c.quadraticCurveTo(w * 0.9, groundY - 20, w, groundY - 60);
     c.lineTo(w, groundY); c.fill();
-    c.fillStyle = '#5a3a2a';
-    for (let i = 0; i < 3; i++) {
-      const tx = 130 + i * 300; const th = 45;
-      c.fillRect(tx - 3, groundY - th, 6, th);
-      const sway = Math.sin(tiempo * 2 + i) * 3;
-      c.fillStyle = '#3a7a3a';
-      c.beginPath(); c.arc(tx + sway, groundY - th - 8, 18, 0, Math.PI * 2); c.fill();
-      c.fillStyle = '#5a3a2a';
-    }
   } else if (nombre === 'infierno') {
     c.fillStyle = '#1a0505';
     c.beginPath();
@@ -358,14 +317,6 @@ function drawFondo(c, w, h, nombre, tiempo, esJuego) {
     c.lineTo(300, groundY - 200); c.lineTo(430, groundY - 100); c.lineTo(560, groundY - 180);
     c.lineTo(700, groundY - 90); c.lineTo(820, groundY - 150); c.lineTo(w, groundY - 60);
     c.lineTo(w, groundY); c.fill();
-    for (let i = 0; i < 4; i++) {
-      const x = (i / 4) * w + 40;
-      const h2 = 30 + Math.sin(tiempo * 4 + i) * 15;
-      const g2 = c.createLinearGradient(0, groundY - h2, 0, groundY);
-      g2.addColorStop(0, '#ffcc00'); g2.addColorStop(0.5, '#ff6600'); g2.addColorStop(1, '#ff220088');
-      c.fillStyle = g2;
-      c.beginPath(); c.moveTo(x - 12, groundY); c.quadraticCurveTo(x, groundY - h2 - 10, x + 12, groundY); c.fill();
-    }
   } else if (nombre === 'guerra') {
     c.fillStyle = '#1a1a1a';
     const bh = [70, 110, 90, 140, 80];
@@ -408,9 +359,6 @@ function drawFondo(c, w, h, nombre, tiempo, esJuego) {
   drawAmbiente(c, w, h);
 }
 
-// ============================================================
-//   NAVEGACIÓN
-// ============================================================
 let inGame = false;
 let currentScreen = 'menu';
 
@@ -484,9 +432,6 @@ function showToast(msg) {
   toastTimeout = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ============================================================
-//   DURACIÓN
-// ============================================================
 function initDuracion() {
   const cont = document.getElementById('dur-grid');
   cont.innerHTML = '';
@@ -499,9 +444,6 @@ function initDuracion() {
   });
 }
 
-// ============================================================
-//   AJUSTES
-// ============================================================
 let listeningKey = null;
 
 function teclaTexto(k) {
@@ -564,9 +506,6 @@ document.getElementById('btn-reset-touch').addEventListener('click', () => {
   showToast('Posiciones restauradas');
 });
 
-// ============================================================
-//   EDITOR DE CONTROLES TÁCTILES
-// ============================================================
 function initTouchEditor() {
   const area = document.getElementById('touch-edit-area');
   area.innerHTML = '';
@@ -673,8 +612,6 @@ document.getElementById('btn-touch-save').addEventListener('click', () => {
     const h = btn.offsetHeight;
 
     const nuevo = { ...TOUCH_DEFAULT[id] };
-
-    // Y: si está en la mitad superior, usar fromTop; si no, fromBottom
     if (y < areaH / 2) {
       delete nuevo.fromBottom;
       nuevo.fromTop = y;
@@ -682,7 +619,6 @@ document.getElementById('btn-touch-save').addEventListener('click', () => {
       delete nuevo.fromTop;
       nuevo.fromBottom = areaH - y - h;
     }
-    // X: si está en la mitad derecha, usar fromRight; si no, fromLeft
     if (x + w / 2 > areaW / 2) {
       delete nuevo.fromLeft;
       nuevo.fromRight = areaW - x - w;
@@ -699,9 +635,6 @@ document.getElementById('btn-touch-save').addEventListener('click', () => {
 
 document.getElementById('btn-touch-cancel').addEventListener('click', () => showScreen('settings'));
 
-// ============================================================
-//   CONTROLES TÁCTILES EN PARTIDA
-// ============================================================
 const touchState = {
   moveLeft: false, moveRight: false,
   aimUp: false, aimDown: false,
@@ -758,14 +691,12 @@ function buildTouchControls() {
     btn.style.width = b.size + 'px';
     btn.style.height = b.size + 'px';
 
-    // X
     let x;
     if (pos.fromRight !== undefined) {
       x = pw - pos.fromRight - b.size;
     } else {
       x = pos.fromLeft || 16;
     }
-    // Y
     let y;
     if (pos.fromTop !== undefined) {
       y = pos.fromTop;
@@ -840,9 +771,6 @@ window.addEventListener('orientationchange', () => {
   setTimeout(() => { if (ES_TACTIL && inGame) buildTouchControls(); }, 200);
 });
 
-// ============================================================
-//   ASPECTOS
-// ============================================================
 let currentTab = 'p1';
 
 function initAspectos() {
@@ -920,9 +848,6 @@ function previewLoop() {
 }
 requestAnimationFrame(previewLoop);
 
-// ============================================================
-//   DIBUJO DE SKIN
-// ============================================================
 function drawCannonSkin(c, id, x, y, angle, barrelLen) {
   const color = colorDe(id);
   const skin = skinDe(id);
@@ -982,9 +907,6 @@ function drawCannonSkin(c, id, x, y, angle, barrelLen) {
   }
 }
 
-// ============================================================
-//   INPUT TECLADO
-// ============================================================
 const keys = {};
 function normKey(k) {
   if (k === ' ') return ' ';
@@ -1008,7 +930,7 @@ document.addEventListener('keydown', e => {
   const yaEstaba = !!keys[norm];
   keys[norm] = true;
 
-  const bloqueadoPorTurno = ES_TACTIL && modoActual === 'local';
+  const bloqueadoPorTurno = ES_TACTIL && (modoActual === 'local' || modoActual === 'bot');
   const puedeActuar = (id) => !bloqueadoPorTurno || turnoActual === id;
 
   if (!yaEstaba) {
@@ -1045,7 +967,6 @@ function tryRelease(id) {
   shoot(id, p.charge);
   p.charge = 0;
 
-  // En móvil con semiturnos (LOCAL o BOT), cambiar turno al disparar
   if (ES_TACTIL && (modoActual === 'local' || modoActual === 'bot')) {
     cambiarTurno();
   }
@@ -1069,7 +990,6 @@ function tryJump(id) {
   }
 }
 
-// ---------- BUFFS ----------
 function tieneBuff(p, tipo) { return p.buffs[tipo] && p.buffs[tipo].t > 0; }
 function aplicarBuff(p, tipo) {
   const def = BUFFS[tipo];
@@ -1082,7 +1002,6 @@ function danioDe(p) {
   return tieneBuff(p, 'dmg2') ? base * 2 : base;
 }
 
-// ---------- SORTEO ----------
 function sortearRareza() {
   const total = Object.values(PESOS_RAREZA).reduce((a, b) => a + b, 0);
   let r = Math.random() * total;
@@ -1099,7 +1018,6 @@ function sortearBuff() {
   return { tipo, rareza, def: BUFFS[tipo] };
 }
 
-// ---------- DISPARO ----------
 function shoot(id, chargeRatio) {
   const p = players[id];
   if (now - p.lastShot < cooldownDe(p)) return;
@@ -1125,7 +1043,6 @@ function shoot(id, chargeRatio) {
   p.lastShot = now;
 }
 
-// ---------- TURNOS ----------
 function cambiarTurno() {
   turnoActual = (turnoActual === 1) ? 2 : 1;
   tiempoTurno = TURNO_TIME;
@@ -1134,9 +1051,6 @@ function cambiarTurno() {
   }
 }
 
-// ============================================================
-//   IA BOT (PC tiempo real)
-// ============================================================
 const BOT_CONFIG = {
   basico:      { errorAngulo: 15, errorPotencia: 0.25, salto: 0.3 },
   casual:      { errorAngulo: 8,  errorPotencia: 0.12, salto: 0.6 },
@@ -1246,13 +1160,9 @@ function botShoot() {
   bot.botTargetX = PLAT_RIGHT_MIN + Math.random() * (PLAT_RIGHT_MAX - PLAT_RIGHT_MIN);
 }
 
-// ============================================================
-//   UPDATE
-// ============================================================
 function update(dt) {
   now += dt;
 
-  // Cronómetro
   if (!gameOver && faseActual !== 'over') {
     tiempoRestante -= dt;
     if (faseActual === 'normal' && tiempoRestante <= 0) {
@@ -1265,7 +1175,6 @@ function update(dt) {
     }
   }
 
-  // ---------- SEMITURNOS EN MÓVIL (LOCAL O BOT) ----------
   if (ES_TACTIL && (modoActual === 'local' || modoActual === 'bot') && !gameOver) {
     const p = players[turnoActual];
 
@@ -1287,7 +1196,6 @@ function update(dt) {
     }
   }
 
-  // ---------- MOVIMIENTO Y APUNTADO ----------
   for (const id of [1, 2]) {
     const p = players[id];
     if (p.esBot) continue;
@@ -1326,11 +1234,9 @@ function update(dt) {
 
   touchState.jumpPressedThisFrame = false;
 
-  // ---------- IA BOT (SOLO EN PC, MODO TIEMPO REAL) ----------
   if (players[2].esBot && !ES_TACTIL) {
     updateBot(dt);
   }
-  // En móvil modo bot: mover el bot un poco para que parezca vivo
   if (players[2].esBot && ES_TACTIL) {
     const bot = players[2];
     bot.botThink -= dt;
@@ -1344,7 +1250,6 @@ function update(dt) {
     }
   }
 
-  // ---------- FÍSICA DEL SALTO ----------
   for (const id of [1, 2]) {
     const p = players[id];
     if (p.enAire) {
@@ -1369,7 +1274,6 @@ function update(dt) {
     }
   }
 
-  // ---------- CARGA ----------
   for (const id of [1, 2]) {
     const p = players[id];
     if (p.charging && !p.esBot) {
@@ -1378,7 +1282,6 @@ function update(dt) {
     }
   }
 
-  // ---------- BUFFS ----------
   for (const id of [1, 2]) {
     const p = players[id];
     for (const tipo of Object.keys(p.buffs)) {
@@ -1397,7 +1300,6 @@ function update(dt) {
 
   updateAmbiente(dt, W, H);
 
-  // ---------- BALAS ----------
   for (let i = bullets.length - 1; i >= 0; i--) {
     const b = bullets[i];
     b.vy += GRAVITY * dt;
@@ -1475,7 +1377,6 @@ function update(dt) {
     if (b.x < -60 || b.x > W + 60 || b.y > H + 60) bullets.splice(i, 1);
   }
 
-  // ---------- PARTÍCULAS ----------
   for (let i = particles.length - 1; i >= 0; i--) {
     const pt = particles[i];
     pt.x += pt.vx * dt;
@@ -1485,7 +1386,6 @@ function update(dt) {
     if (pt.life <= 0) particles.splice(i, 1);
   }
 
-  // ---------- GLOBOS ----------
   nextGloboSpawn -= dt;
   if (nextGloboSpawn <= 0 && globos.length < MAX_GLOBOS) {
     const sorteo = sortearBuff();
@@ -1506,7 +1406,6 @@ function update(dt) {
     if (g.y < -50) globos.splice(i, 1);
   }
 
-  // ---------- FIN ----------
   if (!gameOver && (players[1].hp <= 0 || players[2].hp <= 0)) {
     gameOver = true;
     faseActual = 'over';
@@ -1575,9 +1474,6 @@ function updateDebug() {
   document.getElementById('name-p2').textContent = nameDe(2);
 }
 
-// ============================================================
-//   DIBUJO
-// ============================================================
 function draw() {
   drawFondo(ctx, W, H, prefs.fondo, now, true);
 
@@ -1741,7 +1637,6 @@ function drawCannonGame(id) {
   }
 }
 
-// ---------- HELPERS ----------
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 function hexAlpha(hex, alpha) {
   if (hex.startsWith('#')) {
@@ -1844,9 +1739,6 @@ document.getElementById('btn-victory-menu').addEventListener('click', () => {
   showScreen('menu');
 });
 
-// ============================================================
-//   LOOP
-// ============================================================
 let lastT = performance.now();
 function loop(t) {
   const dt = Math.min(0.05, (t - lastT) / 1000);
@@ -1856,9 +1748,6 @@ function loop(t) {
   requestAnimationFrame(loop);
 }
 
-// ============================================================
-//   FONDO MENÚ
-// ============================================================
 const bgCanvas = document.getElementById('bg-canvas');
 const bgCtx = bgCanvas.getContext('2d');
 function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
@@ -1960,9 +1849,6 @@ function bgLoop(t) {
   requestAnimationFrame(bgLoop);
 }
 
-// ============================================================
-//   ARRANQUE
-// ============================================================
 showScreen('menu');
 updateHUD();
 updateBuffBar();
