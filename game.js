@@ -1,13 +1,14 @@
 // ============================================================
-//  DUELO DE CAÑONES — v2.0 (layout de botones ajustado)
+//  DUELO DE CAÑONES — v2.0 (botones abajo, no tapan el juego)
 // ============================================================
 
-// ---------- LIMPIAR VERSIONES VIEJAS (esta vez sí) ----------
-if (localStorage.getItem('duelo-prefs-v4') !== 'ok') {
+// ---------- LIMPIAR VERSIONES VIEJAS ----------
+if (localStorage.getItem('duelo-prefs-v5') !== 'ok') {
   localStorage.removeItem('duelo-prefs');
   localStorage.setItem('duelo-prefs-v2', 'ok');
   localStorage.setItem('duelo-prefs-v3', 'ok');
   localStorage.setItem('duelo-prefs-v4', 'ok');
+  localStorage.setItem('duelo-prefs-v5', 'ok');
 }
 
 // ---------- CONFIG ----------
@@ -104,23 +105,17 @@ const BUFFS_POR_RAREZA = {
 };
 
 // ============================================================
-//   POSICIONES DE BOTONES TÁCTILES (AJUSTADAS)
+//   POSICIONES DE BOTONES TÁCTILES
 // ============================================================
-// Fila SUPERIOR (arriba):  SALTAR + APUNTAR ARRIBA
-// Fila INFERIOR (abajo):   MOVER IZQ + APUNTAR ABAJO + MOVER DER + DISPARAR
-//
-// fromLeft / fromRight  = distancia desde el borde izq/der
-// fromTop / fromBottom  = distancia desde el borde sup/inf
+// Se adaptan a la orientación (vertical/horizontal) en buildTouchControls.
+// Posiciones por defecto en una sola fila pegada al fondo.
 const TOUCH_DEFAULT = {
-  // Fila superior
-  jump:       { fromLeft: 20,  fromBottom: 200, icono: '⤒', label: 'SALTAR',  cls: 'jump-btn' },
-  aimUp:      { fromLeft: 110, fromBottom: 200, icono: '▲', label: 'ARRIBA',  cls: 'aim-btn' },
-  // Fila inferior
-  moveLeft:   { fromLeft: 20,  fromBottom: 100, icono: '◀', label: 'IZQ',     cls: '' },
-  aimDown:    { fromLeft: 110, fromBottom: 100, icono: '▼', label: 'ABAJO',   cls: 'aim-btn' },
-  moveRight:  { fromLeft: 200, fromBottom: 100, icono: '▶', label: 'DER',     cls: '' },
-  // Disparar a la derecha
-  shoot:      { fromRight: 20, fromBottom: 100, icono: '🔥', label: 'DISPARAR', cls: 'shoot-btn' }
+  jump:       { fromLeft: 20,  fromBottom: 30, icono: '⤒', label: 'SALTAR',  cls: 'jump-btn' },
+  aimUp:      { fromLeft: 100, fromBottom: 30, icono: '▲', label: 'ARRIBA',  cls: 'aim-btn' },
+  moveLeft:   { fromLeft: 180, fromBottom: 30, icono: '◀', label: 'IZQ',     cls: '' },
+  aimDown:    { fromLeft: 260, fromBottom: 30, icono: '▼', label: 'ABAJO',   cls: 'aim-btn' },
+  moveRight:  { fromLeft: 340, fromBottom: 30, icono: '▶', label: 'DER',     cls: '' },
+  shoot:      { fromRight: 20, fromBottom: 30, icono: '🔥', label: 'DISPARAR', cls: 'shoot-btn' }
 };
 
 const DEFAULT_PREFS = {
@@ -675,6 +670,9 @@ function getJugadorActual() {
   return 1;
 }
 
+// ============================================================
+//   CONSTRUIR BOTONES TÁCTILES (con layout adaptativo)
+// ============================================================
 function buildTouchControls() {
   const cont = document.getElementById('touch-controls');
   cont.innerHTML = '';
@@ -682,20 +680,29 @@ function buildTouchControls() {
   const ph = window.innerHeight;
   const esVertical = ph > pw;
 
-  const btnSize = esVertical ? 68 : 58;
-  const bigSize = esVertical ? 96 : 84;
+  const btnSize = esVertical ? 62 : 54;
+  const bigSize = esVertical ? 84 : 76;
 
   const botones = [
-    { id: 'moveLeft',  icono: '◀', cls: '',           size: btnSize },
-    { id: 'moveRight', icono: '▶', cls: '',           size: btnSize },
-    { id: 'aimUp',     icono: '▲', cls: 'aim-btn',    size: btnSize },
-    { id: 'aimDown',   icono: '▼', cls: 'aim-btn',    size: btnSize },
-    { id: 'jump',      icono: '⤒', cls: 'jump-btn',   size: btnSize },
+    { id: 'jump',      icono: '⤒', cls: 'jump-btn',  size: btnSize },
+    { id: 'aimUp',     icono: '▲', cls: 'aim-btn',   size: btnSize },
+    { id: 'moveLeft',  icono: '◀', cls: '',          size: btnSize },
+    { id: 'aimDown',   icono: '▼', cls: 'aim-btn',   size: btnSize },
+    { id: 'moveRight', icono: '▶', cls: '',          size: btnSize },
     { id: 'shoot',     icono: '🔥', cls: 'shoot-btn', size: bigSize }
   ];
 
+  // Ancho total de la fila de botones de la izquierda
+  const filaBotones = ['jump', 'aimUp', 'moveLeft', 'aimDown', 'moveRight'];
+  const sep = 8;
+  const anchoIzqTotal = filaBotones.length * btnSize + (filaBotones.length - 1) * sep;
+  const anchoShoot = bigSize;
+  const margen = 14;
+
+  // Si no entra todo en una fila (móvil angosto), usar 2 filas
+  const noEntraEnUnaFila = (anchoIzqTotal + anchoShoot + margen * 3) > pw;
+
   botones.forEach(b => {
-    const pos = prefs.touch[b.id];
     const btn = document.createElement('div');
     btn.className = 'touch-btn ' + b.cls;
     btn.dataset.id = b.id;
@@ -703,17 +710,31 @@ function buildTouchControls() {
     btn.style.width = b.size + 'px';
     btn.style.height = b.size + 'px';
 
-    let x;
-    if (pos.fromRight !== undefined) {
-      x = pw - pos.fromRight - b.size;
+    let x, y;
+
+    if (b.id === 'shoot') {
+      // SIEMPRE abajo a la derecha
+      x = pw - margen - b.size;
+      y = ph - margen - b.size;
+    } else if (!noEntraEnUnaFila) {
+      // Una sola fila pegada abajo
+      const idx = filaBotones.indexOf(b.id);
+      x = margen + idx * (btnSize + sep);
+      y = ph - margen - b.size;
     } else {
-      x = pos.fromLeft || 16;
-    }
-    let y;
-    if (pos.fromTop !== undefined) {
-      y = pos.fromTop;
-    } else {
-      y = ph - (pos.fromBottom || 16) - b.size;
+      // Dos filas (móvil angosto):
+      // Fila de arriba: jump, aimUp, moveLeft
+      // Fila de abajo: aimDown, moveRight
+      if (b.id === 'jump' || b.id === 'aimUp' || b.id === 'moveLeft') {
+        const idx = ['jump', 'aimUp', 'moveLeft'].indexOf(b.id);
+        x = margen + idx * (btnSize + sep);
+        y = ph - margen - b.size - (btnSize + sep);
+      } else {
+        // aimDown, moveRight
+        const idx = ['aimDown', 'moveRight'].indexOf(b.id);
+        x = margen + idx * (btnSize + sep);
+        y = ph - margen - b.size;
+      }
     }
 
     x = Math.max(4, Math.min(pw - b.size - 4, x));
