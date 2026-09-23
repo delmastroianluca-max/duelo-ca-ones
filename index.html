@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Duelo de Cañones</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -22,7 +22,7 @@
       <button class="btn" data-go="skins">ASPECTOS</button>
       <button class="btn" data-go="settings">AJUSTES</button>
     </div>
-    <p class="version">v1.6</p>
+    <p class="version">v1.9</p>
   </div>
 </section>
 
@@ -224,9 +224,7 @@
       <h2>PERSONALIZAR BOTONES</h2>
       <p>Arrastrá cada botón a donde quieras. Se guardan al pulsar GUARDAR.</p>
     </div>
-    <div id="touch-edit-area">
-      <!-- Los botones se crean dinámicamente con JS -->
-    </div>
+    <div id="touch-edit-area"></div>
     <div class="touch-edit-footer">
       <button class="btn primary" id="btn-touch-save">GUARDAR</button>
       <button class="btn ghost" id="btn-touch-cancel">CANCELAR</button>
@@ -239,14 +237,11 @@
   <div id="game-container">
     <div id="canvas-wrap">
       <canvas id="c" width="900" height="560"></canvas>
-
       <div id="timer-bar">
         <div id="timer">6:00</div>
         <div id="timer-phase">PARTIDA NORMAL</div>
       </div>
-
       <div id="turn-banner"></div>
-
       <div id="hud">
         <div class="side p1">
           <div><span id="name-p1">J1</span> — <span id="hp1">250</span> HP</div>
@@ -263,13 +258,10 @@
           <div class="dmg-done">Daño: <span id="dmg2">0</span></div>
         </div>
       </div>
-
       <div id="hint">Usa las teclas configuradas en AJUSTES</div>
       <div id="debug"></div>
       <button id="btn-back" class="btn ghost small">← MENÚ</button>
     </div>
-
-    <!-- Controles táctiles (solo en móvil) -->
     <div id="touch-controls"></div>
   </div>
 </section>
