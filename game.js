@@ -2,13 +2,17 @@
 //  DUELO DE CAÑONES — v1.9 (layout nuevo + bot arreglado)
 // ============================================================
 
-// ---------- LIMPIAR VERSIONES VIEJAS (una vez) ----------
-if (localStorage.getItem('duelo-prefs-v3') !== 'ok') {
+// ---------- LIMPIAR VERSIONES VIEJAS ----------
+// Forzar limpieza SIEMPRE que se cargue la página en móvil.
+// Esto asegura que las posiciones nuevas de botones se apliquen.
+const ES_MOVIL_DETECTADO = (
+  'ontouchstart' in window ||
+  navigator.maxTouchPoints > 0 ||
+  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+);
+if (ES_MOVIL_DETECTADO) {
   localStorage.removeItem('duelo-prefs');
-  localStorage.setItem('duelo-prefs-v2', 'ok');
-  localStorage.setItem('duelo-prefs-v3', 'ok');
 }
-
 // ---------- CONFIG ----------
 const W = 900, H = 560;
 const GROUND_Y = H - 60;
