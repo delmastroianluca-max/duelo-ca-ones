@@ -1,18 +1,15 @@
 // ============================================================
-//  DUELO DE CAÑONES — v1.9 (layout nuevo + bot arreglado)
+//  DUELO DE CAÑONES — v2.0 (layout de botones ajustado)
 // ============================================================
 
-// ---------- LIMPIAR VERSIONES VIEJAS ----------
-// Forzar limpieza SIEMPRE que se cargue la página en móvil.
-// Esto asegura que las posiciones nuevas de botones se apliquen.
-const ES_MOVIL_DETECTADO = (
-  'ontouchstart' in window ||
-  navigator.maxTouchPoints > 0 ||
-  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-);
-if (ES_MOVIL_DETECTADO) {
+// ---------- LIMPIAR VERSIONES VIEJAS (esta vez sí) ----------
+if (localStorage.getItem('duelo-prefs-v4') !== 'ok') {
   localStorage.removeItem('duelo-prefs');
+  localStorage.setItem('duelo-prefs-v2', 'ok');
+  localStorage.setItem('duelo-prefs-v3', 'ok');
+  localStorage.setItem('duelo-prefs-v4', 'ok');
 }
+
 // ---------- CONFIG ----------
 const W = 900, H = 560;
 const GROUND_Y = H - 60;
@@ -106,13 +103,24 @@ const BUFFS_POR_RAREZA = {
   legendaria: ['inmunidad']
 };
 
+// ============================================================
+//   POSICIONES DE BOTONES TÁCTILES (AJUSTADAS)
+// ============================================================
+// Fila SUPERIOR (arriba):  SALTAR + APUNTAR ARRIBA
+// Fila INFERIOR (abajo):   MOVER IZQ + APUNTAR ABAJO + MOVER DER + DISPARAR
+//
+// fromLeft / fromRight  = distancia desde el borde izq/der
+// fromTop / fromBottom  = distancia desde el borde sup/inf
 const TOUCH_DEFAULT = {
-  jump:       { fromLeft: 20,  fromTop: 20,     icono: '⤒', label: 'SALTAR',  cls: 'jump-btn' },
-  aimUp:      { fromLeft: 110, fromTop: 20,     icono: '▲', label: 'ARRIBA',  cls: 'aim-btn' },
-  moveLeft:   { fromLeft: 20,  fromBottom: 30,  icono: '◀', label: 'IZQ',     cls: '' },
-  aimDown:    { fromLeft: 110, fromBottom: 30,  icono: '▼', label: 'ABAJO',   cls: 'aim-btn' },
-  moveRight:  { fromRight: 130, fromBottom: 30, icono: '▶', label: 'DER',     cls: '' },
-  shoot:      { fromRight: 20, fromBottom: 30,  icono: '🔥', label: 'DISPARAR', cls: 'shoot-btn' }
+  // Fila superior
+  jump:       { fromLeft: 20,  fromBottom: 200, icono: '⤒', label: 'SALTAR',  cls: 'jump-btn' },
+  aimUp:      { fromLeft: 110, fromBottom: 200, icono: '▲', label: 'ARRIBA',  cls: 'aim-btn' },
+  // Fila inferior
+  moveLeft:   { fromLeft: 20,  fromBottom: 100, icono: '◀', label: 'IZQ',     cls: '' },
+  aimDown:    { fromLeft: 110, fromBottom: 100, icono: '▼', label: 'ABAJO',   cls: 'aim-btn' },
+  moveRight:  { fromLeft: 200, fromBottom: 100, icono: '▶', label: 'DER',     cls: '' },
+  // Disparar a la derecha
+  shoot:      { fromRight: 20, fromBottom: 100, icono: '🔥', label: 'DISPARAR', cls: 'shoot-btn' }
 };
 
 const DEFAULT_PREFS = {
