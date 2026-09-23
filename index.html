@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Duelo de Cañones</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ==================== MENÚ PRINCIPAL ==================== -->
+<section id="screen-menu" class="screen active">
+  <div class="panel">
+    <h1 class="title">DUELO DE CAÑONES</h1>
+    <p class="subtitle">— 1v1 balístico en 2D —</p>
+    <div class="menu-buttons">
+      <button class="btn primary" data-go="mode">JUGAR</button>
+      <button class="btn" data-go="howto">CÓMO JUGAR</button>
+      <button class="btn" data-go="buffs">MEJORAS</button>
+      <button class="btn" data-go="skins">ASPECTOS</button>
+      <button class="btn" data-go="settings">AJUSTES</button>
+    </div>
+    <p class="version">v1.6</p>
+  </div>
+</section>
+
+<!-- ==================== ELEGIR MODO ==================== -->
+<section id="screen-mode" class="screen">
+  <div class="panel">
+    <h2 class="title-sm">ELEGIR MODO</h2>
+    <div class="menu-buttons">
+      <button class="btn primary" id="btn-vsbot">J1 vs BOT</button>
+      <button class="btn" id="btn-local">JUGAR LOCAL (2 jugadores)</button>
+      <button class="btn" id="btn-online">JUGAR ONLINE</button>
+      <button class="btn ghost" data-go="menu">← VOLVER</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ELEGIR NIVEL BOT ==================== -->
+<section id="screen-botlevel" class="screen">
+  <div class="panel">
+    <h2 class="title-sm">NIVEL DEL BOT</h2>
+    <p class="sub-note">Elige la dificultad de la CPU</p>
+    <div class="menu-buttons">
+      <button class="btn" data-botlevel="basico">🟢 BÁSICO<br><small style="font-size:11px;color:#889;">Falla mucho · lento</small></button>
+      <button class="btn" data-botlevel="casual">🟡 CASUAL<br><small style="font-size:11px;color:#889;">Equilibrado</small></button>
+      <button class="btn" data-botlevel="profesional">🔴 PROFESIONAL<br><small style="font-size:11px;color:#889;">Preciso · rápido</small></button>
+      <button class="btn ghost" data-go="mode">← VOLVER</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DURACIÓN ==================== -->
+<section id="screen-duracion" class="screen">
+  <div class="panel">
+    <h2 class="title-sm">DURACIÓN DE LA PARTIDA</h2>
+    <p class="sub-note">El tiempo normal. Luego habrá <b>60 s de muerte súbita</b>.</p>
+    <div class="dur-grid" id="dur-grid"></div>
+    <div class="menu-buttons" style="margin-top:20px;">
+      <button class="btn primary" id="btn-empezar">EMPEZAR</button>
+      <button class="btn ghost" id="btn-dur-volver">← VOLVER</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CÓMO JUGAR ==================== -->
+<section id="screen-howto" class="screen">
+  <div class="panel wide">
+    <h2 class="title-sm">CÓMO JUGAR</h2>
+    <div class="info-block">
+      <h3>🎯 Objetivo</h3>
+      <p>Baja la vida del rival de <b>250 a 0</b>. Cada impacto quita <b>20 HP</b>. Gana el último en pie.</p>
+
+      <h3>⏱️ Tiempo y muerte súbita</h3>
+      <ul>
+        <li>Duración normal: <b>3, 5, 6 o 10 minutos</b>.</li>
+        <li>Al terminar → <b>60 s de muerte súbita</b> (cada impacto quita 50 HP).</li>
+        <li>Si al acabar la muerte súbita los 2 siguen vivos → gana quien <b>más daño hizo</b>. Si empatan → más HP. Si también → empate.</li>
+      </ul>
+
+      <h3>🕹️ Controles en PC</h3>
+      <div class="controls-grid">
+        <div>
+          <h4 style="color:#00ffcc">Jugador 1</h4>
+          <ul>
+            <li><b>A / D</b> — Moverse</li>
+            <li><b>W / S</b> — Apuntar</li>
+            <li><b>Q</b> — Saltar</li>
+            <li><b>ESPACIO</b> — Disparar</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#ff3366">Jugador 2</h4>
+          <ul>
+            <li><b>← / →</b> — Moverse</li>
+            <li><b>↑ / ↓</b> — Apuntar</li>
+            <li><b>0</b> — Saltar</li>
+            <li><b>ENTER</b> — Disparar</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>📱 Controles en móvil</h3>
+      <ul>
+        <li>Botones táctiles en pantalla: mover, apuntar, saltar y disparar.</li>
+        <li>En móvil los turnos son por <b>semiturnos</b>: uno dispara, luego el otro. <b>30 s máx por turno</b>.</li>
+        <li>Podés personalizar la posición de los botones desde <b>AJUSTES → Controles táctiles</b>.</li>
+      </ul>
+
+      <h3>🎈 Globos</h3>
+      <ul>
+        <li>Dispara a los globos para ganar mejoras temporales.</li>
+        <li>¡Ojo con tus propios rebotes!</li>
+      </ul>
+    </div>
+    <button class="btn ghost" data-go="menu">← VOLVER</button>
+  </div>
+</section>
+
+<!-- ==================== MEJORAS ==================== -->
+<section id="screen-buffs" class="screen">
+  <div class="panel wide">
+    <h2 class="title-sm">MEJORAS</h2>
+    <p class="sub-note">Dispara a los globos flotantes para activarlas.</p>
+    <div class="buffs-list">
+      <div class="buff-card rareza-comun"><span class="icon">❤️</span><div><b>Curación</b> — <span class="rareza-tag">Común · 25%</span><p>+30 HP instantáneos.</p></div></div>
+      <div class="buff-card rareza-comun"><span class="icon">✨</span><div><b>Regeneración</b> — <span class="rareza-tag">Común · 25%</span><p>+1 HP cada 0.10 s durante 2 s (+20 HP totales).</p></div></div>
+      <div class="buff-card rareza-pococomun"><span class="icon">💥</span><div><b>Daño doble</b> — <span class="rareza-tag">Poco común · 15%</span><p>Cada impacto quita 40 en vez de 20. Dura 10 s.</p></div></div>
+      <div class="buff-card rareza-pococomun"><span class="icon">👁️</span><div><b>Visión</b> — <span class="rareza-tag">Poco común · 15%</span><p>Muestra la trayectoria y elimina la dispersión. Dura 10 s.</p></div></div>
+      <div class="buff-card rareza-rara"><span class="icon">🔫</span><div><b>Metralleta</b> — <span class="rareza-tag">Rara · 7%</span><p>Cooldown reducido a 0.3 s. Dura 10 s.</p></div></div>
+      <div class="buff-card rareza-rara"><span class="icon">🏀</span><div><b>Rebote</b> — <span class="rareza-tag">Rara · 8%</span><p>Tus disparos rebotan una vez. Dura 10 s.</p></div></div>
+      <div class="buff-card rareza-muyrara"><span class="icon">🛡️</span><div><b>Escudo</b> — <span class="rareza-tag">Muy rara · 2%</span><p>Absorbe 1 impacto. Dura 10 s o hasta recibir golpe.</p></div></div>
+      <div class="buff-card rareza-muyrara"><span class="icon">❄️</span><div><b>Congelar</b> — <span class="rareza-tag">Muy rara · 2%</span><p>El rival no puede disparar 4 s.</p></div></div>
+      <div class="buff-card rareza-legendaria"><span class="icon">⭐</span><div><b>Inmunidad</b> — <span class="rareza-tag">Legendaria · 1%</span><p>No recibes daño durante 5 s.</p></div></div>
+    </div>
+    <button class="btn ghost" data-go="menu">← VOLVER</button>
+  </div>
+</section>
+
+<!-- ==================== ASPECTOS ==================== -->
+<section id="screen-skins" class="screen">
+  <div class="panel wide">
+    <h2 class="title-sm">ASPECTOS</h2>
+    <div class="preview-wrap">
+      <canvas id="preview" width="700" height="220"></canvas>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="p1">JUGADOR 1</button>
+      <button class="tab" data-tab="p2">JUGADOR 2</button>
+      <button class="tab" data-tab="bg">FONDO</button>
+    </div>
+    <div class="tab-content active" id="tab-p1">
+      <h3 class="mini-title">Skin del Jugador 1</h3>
+      <div class="skins-grid" id="skins-p1"></div>
+      <h3 class="mini-title">Color del Jugador 1</h3>
+      <div class="colors-grid" id="colors-p1"></div>
+    </div>
+    <div class="tab-content" id="tab-p2">
+      <h3 class="mini-title">Skin del Jugador 2</h3>
+      <div class="skins-grid" id="skins-p2"></div>
+      <h3 class="mini-title">Color del Jugador 2</h3>
+      <div class="colors-grid" id="colors-p2"></div>
+    </div>
+    <div class="tab-content" id="tab-bg">
+      <h3 class="mini-title">Fondo del campo</h3>
+      <div class="fondos-grid" id="fondos-grid"></div>
+    </div>
+    <button class="btn ghost" data-go="menu">← VOLVER</button>
+  </div>
+</section>
+
+<!-- ==================== AJUSTES ==================== -->
+<section id="screen-settings" class="screen">
+  <div class="panel wide">
+    <h2 class="title-sm">AJUSTES</h2>
+
+    <div class="settings-block">
+      <h3 class="mini-title" style="color:#00ffcc">Jugador 1</h3>
+      <div class="keys-grid">
+        <div class="key-row"><span>Mover izquierda</span><button class="key-btn" data-player="1" data-action="left">A</button></div>
+        <div class="key-row"><span>Mover derecha</span><button class="key-btn" data-player="1" data-action="right">D</button></div>
+        <div class="key-row"><span>Apuntar arriba</span><button class="key-btn" data-player="1" data-action="aimUp">W</button></div>
+        <div class="key-row"><span>Apuntar abajo</span><button class="key-btn" data-player="1" data-action="aimDown">S</button></div>
+        <div class="key-row"><span>Saltar</span><button class="key-btn" data-player="1" data-action="jump">Q</button></div>
+        <div class="key-row"><span>Disparar</span><button class="key-btn" data-player="1" data-action="shoot">ESPACIO</button></div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <h3 class="mini-title" style="color:#ff3366">Jugador 2</h3>
+      <div class="keys-grid">
+        <div class="key-row"><span>Mover izquierda</span><button class="key-btn" data-player="2" data-action="left">←</button></div>
+        <div class="key-row"><span>Mover derecha</span><button class="key-btn" data-player="2" data-action="right">→</button></div>
+        <div class="key-row"><span>Apuntar arriba</span><button class="key-btn" data-player="2" data-action="aimUp">↑</button></div>
+        <div class="key-row"><span>Apuntar abajo</span><button class="key-btn" data-player="2" data-action="aimDown">↓</button></div>
+        <div class="key-row"><span>Saltar</span><button class="key-btn" data-player="2" data-action="jump">0</button></div>
+        <div class="key-row"><span>Disparar</span><button class="key-btn" data-player="2" data-action="shoot">ENTER</button></div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <h3 class="mini-title">📱 Controles táctiles</h3>
+      <p class="sub-note" style="font-size:12px;margin:8px 0;">Personalizá dónde querés los botones en móvil.</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn" id="btn-edit-touch">🎯 PERSONALIZAR BOTONES</button>
+        <button class="btn ghost" id="btn-reset-touch">↺ RESTAURAR POSICIÓN</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+      <button class="btn ghost" id="btn-reset-keys">↺ RESTAURAR TECLAS</button>
+      <button class="btn ghost" data-go="menu">← VOLVER</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== EDITOR DE CONTROLES TÁCTILES ==================== -->
+<section id="screen-touch-edit" class="screen">
+  <div class="touch-edit-container">
+    <div class="touch-edit-header">
+      <h2>PERSONALIZAR BOTONES</h2>
+      <p>Arrastrá cada botón a donde quieras. Se guardan al pulsar GUARDAR.</p>
+    </div>
+    <div id="touch-edit-area">
+      <!-- Los botones se crean dinámicamente con JS -->
+    </div>
+    <div class="touch-edit-footer">
+      <button class="btn primary" id="btn-touch-save">GUARDAR</button>
+      <button class="btn ghost" id="btn-touch-cancel">CANCELAR</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== JUEGO ==================== -->
+<section id="screen-game" class="screen">
+  <div id="game-container">
+    <div id="canvas-wrap">
+      <canvas id="c" width="900" height="560"></canvas>
+
+      <div id="timer-bar">
+        <div id="timer">6:00</div>
+        <div id="timer-phase">PARTIDA NORMAL</div>
+      </div>
+
+      <div id="turn-banner"></div>
+
+      <div id="hud">
+        <div class="side p1">
+          <div><span id="name-p1">J1</span> — <span id="hp1">250</span> HP</div>
+          <div class="bar"><div id="bar1" style="width:100%"></div></div>
+          <div class="buffs" id="buffs1"></div>
+          <div class="cd" id="cd1"></div>
+          <div class="dmg-done">Daño: <span id="dmg1">0</span></div>
+        </div>
+        <div class="side p2">
+          <div><span id="name-p2">J2</span> — <span id="hp2">250</span> HP</div>
+          <div class="bar"><div id="bar2" style="width:100%"></div></div>
+          <div class="buffs" id="buffs2"></div>
+          <div class="cd" id="cd2"></div>
+          <div class="dmg-done">Daño: <span id="dmg2">0</span></div>
+        </div>
+      </div>
+
+      <div id="hint">Usa las teclas configuradas en AJUSTES</div>
+      <div id="debug"></div>
+      <button id="btn-back" class="btn ghost small">← MENÚ</button>
+    </div>
+
+    <!-- Controles táctiles (solo en móvil) -->
+    <div id="touch-controls"></div>
+  </div>
+</section>
+
+<!-- ==================== VICTORIA ==================== -->
+<div id="victory-overlay">
+  <div class="victory-card">
+    <h2 id="victory-title">¡GANÓ J1!</h2>
+    <p id="victory-reason">Vida reducida a 0</p>
+    <div class="victory-stats">
+      <div class="stat-col" id="stat-p1">
+        <h4 id="v-name1">Jugador 1</h4>
+        <p>Daño total: <b id="v-dmg1">0</b></p>
+        <p>HP final: <b id="v-hp1">0</b></p>
+      </div>
+      <div class="stat-col" id="stat-p2">
+        <h4 id="v-name2">Jugador 2</h4>
+        <p>Daño total: <b id="v-dmg2">0</b></p>
+        <p>HP final: <b id="v-hp2">0</b></p>
+      </div>
+    </div>
+    <div class="menu-buttons" style="margin-top:20px;">
+      <button class="btn primary" id="btn-revancha">REVANCHA</button>
+      <button class="btn ghost" id="btn-victory-menu">← MENÚ</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="game.js"></script>
+</body>
+</html>
